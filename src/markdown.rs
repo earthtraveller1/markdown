@@ -56,4 +56,35 @@ impl Markdown {
             }).collect()
         }
     }
+    
+    fn to_html(&self) -> String {
+        let mut result = String::new();
+        
+        self.elements.iter().for_each(|element| {
+            match element.element_type {
+                ElementType::Paragraph => {
+                    result.push_str("<p>");
+                    result.push_str(element.text.as_str());
+                    result.push_str("</p>");
+                },
+                ElementType::Header1 => {
+                    result.push_str("<h1>");
+                    result.push_str(element.text.as_str());
+                    result.push_str("</h1>");
+                }
+                ElementType::Header2 => {
+                    result.push_str("<h2>");
+                    result.push_str(element.text.as_str());
+                    result.push_str("</h2>");
+                }
+                ElementType::Header3 => {
+                    result.push_str("<h3>");
+                    result.push_str(element.text.as_str());
+                    result.push_str("</h3>");
+                }
+            }
+        });
+        
+        result
+    }
 }
