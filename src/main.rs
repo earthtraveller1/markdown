@@ -1,5 +1,9 @@
 mod markdown;
 
+use markdown::Markdown;
+
 fn main() {
-    println!("Hello, world!");
+    let markdown = Markdown::from_file("misc/test_file.md").unwrap();
+    
+    println!("{}", markdown.to_html());
 }
