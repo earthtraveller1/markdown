@@ -18,7 +18,7 @@ enum MarkdownError {
 }
 
 impl Markdown {
-    fn from_file(file_name: &str) -> Result<Markdown, MarkdownError> {
+    pub fn from_file(file_name: &str) -> Result<Markdown, MarkdownError> {
         let contents = std::fs::read_to_string(file_name);
         if let Ok(contents) = contents {
             Ok(Markdown::from_str(contents.as_str()))
@@ -27,7 +27,7 @@ impl Markdown {
         }
     }
     
-    fn from_str(contents: &str) -> Markdown {
+    pub fn from_str(contents: &str) -> Markdown {
         Markdown {
             elements: contents.lines().map(|line| {
                 let line = line.trim();
@@ -57,7 +57,7 @@ impl Markdown {
         }
     }
     
-    fn to_html(&self) -> String {
+    pub fn to_html(&self) -> String {
         let mut result = String::new();
         
         self.elements.iter().for_each(|element| {
