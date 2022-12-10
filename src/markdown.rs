@@ -13,7 +13,8 @@ pub struct Markdown {
     elements: Vec<Element>
 }
 
-enum MarkdownError {
+#[derive(Debug)]
+pub enum MarkdownError {
     FileReadError
 }
 
