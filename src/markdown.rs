@@ -30,6 +30,8 @@ impl Markdown {
     fn from_str(contents: &str) -> Markdown {
         Markdown {
             elements: contents.lines().map(|line| {
+                let line = line.trim();
+                
                 if line.starts_with("# ") {
                     Element {
                         element_type: ElementType::Header1,
