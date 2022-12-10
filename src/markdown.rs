@@ -9,7 +9,7 @@ struct Element {
     text: String
 }
 
-struct Markdown {
+pub struct Markdown {
     elements: Vec<Element>
 }
 
