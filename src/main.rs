@@ -43,7 +43,7 @@ fn get_cmd_options() -> CmdOptions {
         input
     })
     .to_options()
-    .descr("This is a description")
+    .descr("A simple CLI program for converting a Markdown file into an HTML file.")
     .run()
 }
 
