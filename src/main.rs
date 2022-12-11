@@ -3,12 +3,34 @@ use std::fs::File;
 use std::io::Write;
 
 const DEFAULT_TEMPLATE: &str = r#"<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
-<head><title>Parsed Markdown Document</title>
-</head>
-<body>
-$$$body$$$
-</body>
+    <head>
+        <title>Markdown Document</title>
+        <style>
+            body {
+                font-family: 'Times New Roman';
+                font-size: 1.25em;
+                margin: auto;
+                max-width: 48em;
+            }
+            
+            h1 {
+                font-size: 3em;
+            }
+            
+            h2 {
+                font-size: 2em;
+            }
+            
+            h3 {
+                font-size: 1.5em;
+            }
+        </style>
+    </head>
+    <body>
+        $$$body$$$
+    </body>
 </html>
 "#;
 
