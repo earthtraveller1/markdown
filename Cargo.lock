@@ -12,6 +12,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "bpaf"
+version = "0.7.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e95b1464dea6edc21be413bf260662aef39490e150455ae3760019738600b4f"
+
+[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -21,6 +27,7 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 name = "markdown"
 version = "0.1.0"
 dependencies = [
+ "bpaf",
  "markdown 0.3.0",
 ]
 
