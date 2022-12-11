@@ -15,6 +15,7 @@ $$$body$$$
 struct CmdOptions {
     output: Option<String>,
     template: Option<String>,
+    scuff: bool,
     input: String,
 }
 
@@ -29,11 +30,16 @@ fn get_cmd_options() -> CmdOptions {
         .long("template")
         .argument::<String>("TEMPLATE")
         .optional();
+    let scuff = bpaf::short('s')
+        .help("Scuff the output file to reduce file size.")
+        .long("scuff")
+        .switch();
     let input = bpaf::positional::<String>("INPUT").help("The Markdown file to parse.");
 
     bpaf::construct!(CmdOptions {
         output,
         template,
+        scuff,
         input
     })
     .to_options()
@@ -50,6 +56,15 @@ fn load_and_parse_markdown(file_name: &str) -> String {
     markdown::to_html(markdown_content.as_str())
 }
 
+fn scuff(string: &str) -> String {
+    let words = string.split_whitespace().collect::<Vec<&str>>();
+    
+    let mut string = String::new();
+    words.iter().for_each(|word| {string.push_str(word); string.push(' ');});
+    
+    string
+}
+
 fn main() {
     let cmd_options = get_cmd_options();
     
@@ -62,7 +77,10 @@ fn main() {
     
     let content = load_and_parse_markdown(cmd_options.input.as_str());
     
-    let output = template.replace("$$$body$$$", content.as_str());
+    let mut output = template.replace("$$$body$$$", content.as_str());
+    if cmd_options.scuff {
+        output = scuff(output.as_str());
+    }
     
     let output_file = if let Some(output) = cmd_options.output {
         output
