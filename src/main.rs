@@ -1,7 +1,3 @@
-mod markdown;
-
-use markdown::Markdown;
-
 struct CmdOptions {
     input: Option<String>,
     output: String,
@@ -50,10 +46,7 @@ fn get_cmd_options() -> CmdOptions {
 }
 
 fn main() {
-    let markdown = Markdown::from_file("misc/test_file.md").unwrap();
     let options = get_cmd_options();
-    
-    println!("{}", markdown.to_html());
     
     if options.input.is_none() {
         println!("Please specify an input file.");
