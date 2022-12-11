@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-markdown = "0.3.0"
+markdown = "1.0.0-alpha.4"
 bpaf = "0.7.7"
