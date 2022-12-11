@@ -1,64 +1,42 @@
+use bpaf::Parser;
+
 struct CmdOptions {
-    input: Option<String>,
-    output: String,
-    template: Option<String>
+    output: Option<String>,
+    template: Option<String>,
+    input: String,
 }
 
 fn get_cmd_options() -> CmdOptions {
-    let mut options = CmdOptions {
-        input: None,
-        output: "index.html".to_string(),
-        template: None
-    };
-    
-    // This states what the next argument will be.
-    #[derive(Copy, Clone)]
-    enum NextArgument {
-        Input, Output, Template
-    }
-    
-    let mut next_arg = NextArgument::Input;
-    
-    let mut args = std::env::args().collect::<Vec<String>>();
-    args.remove(0); // The first argument is the program name.
-    
-    args.iter().for_each(|argument| {
-        match argument.as_str() {
-            "-o" => next_arg = NextArgument::Output,
-            "-t" => next_arg = NextArgument::Template,
-            "--output" => next_arg = NextArgument::Output,
-            "--template" => next_arg = NextArgument::Template,
-            _ => match next_arg {
-                NextArgument::Input => options.input = Some(argument.clone()),
-                NextArgument::Output => {
-                    options.output = argument.clone();
-                    next_arg = NextArgument::Input;
-                },
-                NextArgument::Template => {
-                    options.template = Some(argument.clone());
-                    next_arg = NextArgument::Input;
-                }
-            }
-        }
-    });
-    
-    options
+    let output = bpaf::short('o')
+        .help("The file that the resulting HTML should be outputted to.")
+        .long("output")
+        .argument::<String>("OUTPUT")
+        .optional();
+    let template = bpaf::short('t')
+        .help("The HTML file to use as the template.")
+        .long("template")
+        .argument::<String>("TEMPLATE")
+        .optional();
+    let input = bpaf::positional::<String>("INPUT").help("The Markdown file to parse.");
+
+    bpaf::construct!(CmdOptions {
+        output,
+        template,
+        input
+    })
+    .to_options()
+    .descr("This is a description")
+    .run()
 }
 
 fn main() {
-    let options = get_cmd_options();
-    
-    if options.input.is_none() {
-        println!("Please specify an input file.");
-        return;
+    let cmd_options = get_cmd_options();
+
+    println!("Input: {}", cmd_options.input);
+    if let Some(output) = cmd_options.output {
+        println!("Output: {}", output);
     }
-    
-    let input = options.input.unwrap();
-    
-    println!("The input file: {}", input);
-    println!("The output file: {}", options.output);
-    
-    if let Some(template) = options.template {
-        println!("The template file: {}", template);
+    if let Some(template) = cmd_options.template {
+        println!("Template: {}", template);
     }
 }
