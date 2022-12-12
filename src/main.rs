@@ -6,7 +6,7 @@ const DEFAULT_TEMPLATE: &str = r#"<!DOCTYPE html>
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Markdown Document</title>
+        <title>$$$title$$$</title>
         <style>
             body {
                 font-family: 'Times New Roman';
@@ -69,13 +69,33 @@ fn get_cmd_options() -> CmdOptions {
     .run()
 }
 
-fn load_and_parse_markdown(file_name: &str) -> String {
+struct Markdown {
+    title: String,
+    html: String
+}
+
+fn load_and_parse_markdown(file_name: &str) -> Markdown {
     let markdown_content = std::fs::read_to_string(file_name).unwrap_or_else(|_| {
         eprintln!("Could not load or access {}.", file_name);
         std::process::exit(-1);
     });
     
-    markdown::to_html(markdown_content.as_str())
+    let title = if let Some(title) = markdown_content.lines().find(|line| line.starts_with("# ")) {
+        let mut title = title.to_string();
+        
+        // Remove the # character and the space.
+        title.remove(0);
+        title.remove(0);
+        
+        title
+    } else {
+        "Markdown Document".to_string()
+    };
+    
+    Markdown {
+        title,
+        html: markdown::to_html(markdown_content.as_str())
+    }
 }
 
 fn scuff(string: &str) -> String {
@@ -97,9 +117,11 @@ fn main() {
         })
     } else { DEFAULT_TEMPLATE.to_string() };
     
-    let content = load_and_parse_markdown(cmd_options.input.as_str());
+    let markdown = load_and_parse_markdown(cmd_options.input.as_str());
     
-    let mut output = template.replace("$$$body$$$", content.as_str());
+    let mut output = template.replace("$$$body$$$", markdown.html.as_str());
+    output = output.replace("$$$title$$$", markdown.title.as_str());
+    
     if cmd_options.scuff {
         output = scuff(output.as_str());
     }
