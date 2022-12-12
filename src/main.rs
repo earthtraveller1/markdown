@@ -26,6 +26,10 @@ const DEFAULT_TEMPLATE: &str = r#"<!DOCTYPE html>
             h3 {
                 font-size: 1.5em;
             }
+            
+            p {
+                text-indent: 2.5em;
+            }
         </style>
     </head>
     <body>
