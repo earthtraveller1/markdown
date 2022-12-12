@@ -13,6 +13,7 @@ const DEFAULT_TEMPLATE: &str = r#"<!DOCTYPE html>
                 font-size: 1.25em;
                 margin: auto;
                 max-width: 48em;
+                text-align: justify;
             }
             
             h1 {
