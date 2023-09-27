@@ -48,6 +48,10 @@ impl CmdOptions {
             output: Output::Stdout,
         };
 
+        // The first command line argument would be the program, so we have to first advance onto
+        // the second one.
+        cmd_args.next();
+
         while let Some(arg) = cmd_args.next() {
             if arg == "-o" || arg == "--output" {
                 match cmd_args.next() {
