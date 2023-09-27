@@ -1,4 +1,4 @@
-use std::io::{BufReader, BufWriter, Read, Write};
+use std::io::{Read, Write};
 
 enum Input {
     File(std::fs::File),
