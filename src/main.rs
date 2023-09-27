@@ -89,6 +89,23 @@ impl CmdOptions {
     }
 }
 
+fn lines_to_paragraphs(lines: std::str::Lines) -> Vec<String> {
+    lines
+        .fold(vec!["".to_string()], |mut acc, line| {
+            if line.is_empty() {
+                acc.push(String::new());
+            } else {
+                acc.last_mut().unwrap().push_str(line);
+                acc.last_mut().unwrap().push_str(" ");
+            }
+
+            acc
+        })
+        .iter()
+        .map(|line| line.trim().to_string())
+        .collect()
+}
+
 fn main() {
     let mut cmd_options = match CmdOptions::get() {
         Ok(cmd_options) => cmd_options,
@@ -101,8 +118,14 @@ fn main() {
         std::process::exit(2);
     };
 
-    if let Err(error) = cmd_options.output.write(&contents) {
-        eprintln!("Error while writing to output:\n{:?}", error);
-        std::process::exit(3);
-    }
+    let markdown_source = match String::from_utf8(contents) {
+        Ok(source) => source,
+        Err(_) => {
+            eprintln!("Input is not valid UTF-8. This program only supports source files in UTF-8 encoding.");
+            std::process::exit(4);
+        }
+    };
+
+    let markdown_paragraphs = lines_to_paragraphs(markdown_source.lines());
+    eprintln!("These are the paragraphs:\n{:?}", markdown_paragraphs);
 }
