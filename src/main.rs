@@ -5,7 +5,7 @@ enum Input {
     Stdin,
 }
 
-impl Input {
+impl Read for Input {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, std::io::Error> {
         match self {
             Input::File(file) => file.read(buf),
@@ -19,11 +19,18 @@ enum Output {
     Stdout,
 }
 
-impl Output {
+impl Write for Output {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         match self {
             Output::File(file) => file.write(buf),
             Output::Stdout => std::io::stdout().write(buf),
+        }
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        match self {
+            Output::File(file) => file.flush(),
+            Output::Stdout => std::io::stdout().flush(),
         }
     }
 }
