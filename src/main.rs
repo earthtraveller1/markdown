@@ -1,4 +1,4 @@
-use std::io::{Read, Write};
+use std::io::{BufReader, BufWriter, Read, Write};
 
 enum Input {
     File(std::fs::File),
@@ -85,4 +85,20 @@ impl CmdOptions {
     }
 }
 
-fn main() {}
+fn main() {
+    let mut cmd_options = match CmdOptions::get() {
+        Ok(cmd_options) => cmd_options,
+        Err(_) => std::process::exit(1),
+    };
+
+    let mut contents = Vec::new();
+    if let Err(error) = cmd_options.input.read_to_end(&mut contents) {
+        eprintln!("Error while reading from input:\n{:?}", error);
+        std::process::exit(2);
+    };
+
+    if let Err(error) = cmd_options.output.write(&contents) {
+        eprintln!("Error while writing to output:\n{:?}", error);
+        std::process::exit(3);
+    }
+}
