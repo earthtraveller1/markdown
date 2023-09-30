@@ -1,4 +1,4 @@
-use std::io::{Read, Write};
+use std::io::{BufWriter, Read, Write};
 
 enum Input {
     File(std::fs::File),
@@ -141,6 +141,15 @@ impl Paragraph {
             )
         })
     }
+
+    fn render_html(&self) -> String {
+        match self {
+            Paragraph::Text(text) => String::new() + "<p>" + &text + "</p>",
+            Paragraph::Heading1(text) => String::new() + "<h1>" + &text + "</h1>",
+            Paragraph::Heading2(text) => String::new() + "<h2>" + &text + "</h2>",
+            Paragraph::Heading3(text) => String::new() + "<h3>" + &text + "</h3>",
+        }
+    }
 }
 
 fn lines_to_paragraphs(lines: std::str::Lines) -> Vec<Vec<String>> {
@@ -199,5 +208,18 @@ fn main() {
         })
         .collect::<Vec<Paragraph>>();
 
-    eprintln!("Here are the parsed paragraphs:\n{:?}", parsed_paragraphs);
+    let mut output = BufWriter::new(cmd_options.output);
+    output
+        .write(b"<!DOCTYPE html><html><head></head><body>")
+        .expect("Failed to write to output");
+
+    for paragraph in parsed_paragraphs {
+        output
+            .write(paragraph.render_html().as_bytes())
+            .expect("Failed to write to output");
+    }
+
+    output
+        .write(b"</body></html>")
+        .expect("Failed to write to output");
 }
