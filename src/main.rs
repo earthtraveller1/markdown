@@ -89,6 +89,60 @@ impl CmdOptions {
     }
 }
 
+#[derive(Debug)]
+enum Paragraph {
+    Heading1(String),
+    Heading2(String),
+    Heading3(String),
+    Text(String),
+}
+
+impl Paragraph {
+    fn parse(raw_paragraph: &Vec<String>) -> Result<Paragraph, &'static str> {
+        if raw_paragraph.is_empty() {
+            return Err("There appears to be an empty paragraph.");
+        }
+
+        let first_line = raw_paragraph.first().unwrap();
+        Ok(if first_line.starts_with("# ") {
+            Paragraph::Heading1(
+                raw_paragraph
+                    .first()
+                    .unwrap()
+                    .strip_prefix("# ")
+                    .unwrap()
+                    .to_string(),
+            )
+        } else if first_line.starts_with("## ") {
+            Paragraph::Heading2(
+                raw_paragraph
+                    .first()
+                    .unwrap()
+                    .strip_prefix("## ")
+                    .unwrap()
+                    .to_string(),
+            )
+        } else if first_line.starts_with("### ") {
+            Paragraph::Heading3(
+                raw_paragraph
+                    .first()
+                    .unwrap()
+                    .strip_prefix("### ")
+                    .unwrap()
+                    .to_string(),
+            )
+        } else {
+            Paragraph::Text(
+                raw_paragraph
+                    .iter()
+                    .fold(String::new(), |acc, line| acc + line + " ")
+                    .trim()
+                    .to_string(),
+            )
+        })
+    }
+}
+
 fn lines_to_paragraphs(lines: std::str::Lines) -> Vec<Vec<String>> {
     lines
         .fold(vec![vec!["".to_string()]], |mut acc, line| {
@@ -133,5 +187,17 @@ fn main() {
     };
 
     let markdown_paragraphs = lines_to_paragraphs(markdown_source.lines());
-    eprintln!("These are the paragraphs:\n{:?}", markdown_paragraphs);
+
+    let parsed_paragraphs = markdown_paragraphs
+        .iter()
+        .map(|raw_paragraph| match Paragraph::parse(raw_paragraph) {
+            Ok(p) => p,
+            Err(error) => {
+                eprintln!("Failed to parse paragraph: {}", error);
+                std::process::exit(5);
+            }
+        })
+        .collect::<Vec<Paragraph>>();
+
+    eprintln!("Here are the parsed paragraphs:\n{:?}", parsed_paragraphs);
 }
