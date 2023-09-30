@@ -158,10 +158,10 @@ impl Paragraph {
 
     fn render_html(&self) -> String {
         match self {
-            Paragraph::Text(text) => String::new() + "<p>" + &text + "</p>",
-            Paragraph::Heading1(text) => String::new() + "<h1>" + &text + "</h1>",
-            Paragraph::Heading2(text) => String::new() + "<h2>" + &text + "</h2>",
-            Paragraph::Heading3(text) => String::new() + "<h3>" + &text + "</h3>",
+            Paragraph::Text(text) => format!("<p>{}</p>", text),
+            Paragraph::Heading1(text) => format!("<h1>{}</h1>", text),
+            Paragraph::Heading2(text) => format!("<h2>{}</h2>", text),
+            Paragraph::Heading3(text) => format!("<h3>{}</h3>", text),
             Paragraph::UnorderedList(items) => {
                 format!(
                     "<ul>{}</ul>",
