@@ -97,6 +97,7 @@ enum Paragraph {
     Heading1(String),
     Heading2(String),
     Heading3(String),
+    UnorderedList(Vec<String>),
     Text(String),
 }
 
@@ -134,6 +135,16 @@ impl Paragraph {
                     .unwrap()
                     .to_string(),
             )
+        } else if raw_paragraph
+            .iter()
+            .fold(true, |acc, line| acc && line.trim().starts_with("- "))
+        {
+            Paragraph::UnorderedList(
+                raw_paragraph
+                    .iter()
+                    .map(|line| line.trim().strip_prefix("- ").unwrap().to_string())
+                    .collect(),
+            )
         } else {
             Paragraph::Text(
                 raw_paragraph
@@ -151,6 +162,15 @@ impl Paragraph {
             Paragraph::Heading1(text) => String::new() + "<h1>" + &text + "</h1>",
             Paragraph::Heading2(text) => String::new() + "<h2>" + &text + "</h2>",
             Paragraph::Heading3(text) => String::new() + "<h3>" + &text + "</h3>",
+            Paragraph::UnorderedList(items) => {
+                format!(
+                    "<ul>{}</ul>",
+                    items.iter().fold(String::new(), |acc, item| format!(
+                        "{}<li>{}</li>",
+                        acc, item
+                    ))
+                )
+            }
         }
     }
 }
