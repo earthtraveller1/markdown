@@ -4,7 +4,7 @@ A basic Markdown parser, written in Rust, that is intended for personal use. It 
 
 ## Quick start
 
-This project targets Rust 1.72.1. It is possible to compile this project on an older version of Rust and still have it work as intended, though there are no guarantees.
+This project targets Rust 1.72.1. It may be possible to compile this project on an older version of Rust and still have it work as intended, though there are no guarantees.
 
 ```
 cargo build --release
