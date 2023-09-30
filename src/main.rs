@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use std::io::{BufWriter, Read, Write};
 
 enum Input {
