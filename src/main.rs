@@ -89,20 +89,26 @@ impl CmdOptions {
     }
 }
 
-fn lines_to_paragraphs(lines: std::str::Lines) -> Vec<String> {
+fn lines_to_paragraphs(lines: std::str::Lines) -> Vec<Vec<String>> {
     lines
-        .fold(vec!["".to_string()], |mut acc, line| {
+        .fold(vec![vec!["".to_string()]], |mut acc, line| {
             if line.is_empty() {
-                acc.push(String::new());
+                acc.push(Vec::new());
             } else {
-                acc.last_mut().unwrap().push_str(line);
-                acc.last_mut().unwrap().push_str(" ");
+                acc.last_mut().unwrap().push(line.to_string());
             }
 
             acc
         })
         .iter()
-        .map(|line| line.trim().to_string())
+        .map(|paragraph| {
+            paragraph
+                .iter()
+                .map(|line| line.trim().to_string())
+                .filter(|line| !line.is_empty())
+                .collect()
+        })
+        .filter(|paragraph: &Vec<String>| !paragraph.is_empty())
         .collect()
 }
 
