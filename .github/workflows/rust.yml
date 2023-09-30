@@ -11,12 +11,41 @@ env:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
     - name: Build
       run: cargo build --verbose
+
+    - name: Build Release
+      run: cargo build --release --verbose
+
     - name: Run tests
       run: cargo test --verbose
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v3
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        name: markdown-x86_64-pc-linux-gnu.elf
+        path: target/release/markdown
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v3
+      if: matrix.os == 'windows-latest'
+      with:
+        name: markdown-x86_64-pc-win32-msvc.exe
+        path: target/release/markdown.exe
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v3
+      if: matrix.os == 'macos-latest'
+      with:
+        name: markdown-x86_64-apple-darwin-gnu.elf
+        path: target/release/markdown
