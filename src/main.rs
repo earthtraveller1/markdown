@@ -93,96 +93,59 @@ impl CmdOptions {
 }
 
 #[derive(Debug)]
-enum Paragraph {
-    Heading1(String),
-    Heading2(String),
-    Heading3(String),
-    Heading4(String),
-    UnorderedList(Vec<String>),
-    Text(String),
+enum Line {
+    Normal(String),
+    Heading { level: u8, content: String },
 }
+
+impl Line {
+    fn render_html(&self) -> String {
+        match self {
+            Line::Normal(content) => content.clone(),
+            Line::Heading { level, content } => format!("<h{}>{}</h{}>", level, content, level),
+        }
+    }
+}
+
+#[derive(Debug)]
+struct Paragraph(Vec<Line>);
 
 impl Paragraph {
     fn parse(raw_paragraph: &Vec<String>) -> Result<Paragraph, &'static str> {
-        if raw_paragraph.is_empty() {
-            return Err("There appears to be an empty paragraph.");
-        }
+        Ok(Paragraph(
+            raw_paragraph
+                .iter()
+                .map(|raw_line| {
+                    let hash_counts: u8 = raw_line
+                        .chars()
+                        .take_while(|c| *c == '#')
+                        .count()
+                        .try_into()
+                        .unwrap();
+                    if hash_counts == 0 {
+                        return Line::Normal(raw_line.to_owned());
+                    }
 
-        let first_line = raw_paragraph.first().unwrap();
-        Ok(if first_line.starts_with("# ") {
-            Paragraph::Heading1(
-                raw_paragraph
-                    .first()
-                    .unwrap()
-                    .strip_prefix("# ")
-                    .unwrap()
-                    .to_string(),
-            )
-        } else if first_line.starts_with("## ") {
-            Paragraph::Heading2(
-                raw_paragraph
-                    .first()
-                    .unwrap()
-                    .strip_prefix("## ")
-                    .unwrap()
-                    .to_string(),
-            )
-        } else if first_line.starts_with("### ") {
-            Paragraph::Heading3(
-                raw_paragraph
-                    .first()
-                    .unwrap()
-                    .strip_prefix("### ")
-                    .unwrap()
-                    .to_string(),
-            )
-        } else if first_line.starts_with("#### ") {
-            Paragraph::Heading4(
-                raw_paragraph
-                    .first()
-                    .unwrap()
-                    .strip_prefix("#### ")
-                    .unwrap()
-                    .to_string(),
-            )
-        } else if raw_paragraph
-            .iter()
-            .fold(true, |acc, line| acc && line.trim().starts_with("- "))
-        {
-            Paragraph::UnorderedList(
-                raw_paragraph
-                    .iter()
-                    .map(|line| line.trim().strip_prefix("- ").unwrap().to_string())
-                    .collect(),
-            )
-        } else {
-            Paragraph::Text(
-                raw_paragraph
-                    .iter()
-                    .fold(String::new(), |acc, line| acc + line + " ")
-                    .trim()
-                    .to_string(),
-            )
-        })
+                    if raw_line.chars().nth(hash_counts.into()) != Some(' ') {
+                        return Line::Normal(raw_line.to_owned());
+                    }
+
+                    return Line::Heading {
+                        level: hash_counts,
+                        content: raw_line.to_owned(),
+                    };
+                })
+                .collect(),
+        ))
     }
 
     fn render_html(&self) -> String {
-        match self {
-            Paragraph::Text(text) => format!("<p>{}</p>", text),
-            Paragraph::Heading1(text) => format!("<h1>{}</h1>", text),
-            Paragraph::Heading2(text) => format!("<h2>{}</h2>", text),
-            Paragraph::Heading3(text) => format!("<h3>{}</h3>", text),
-            Paragraph::Heading4(text) => format!("<h4>{}</h4>", text),
-            Paragraph::UnorderedList(items) => {
-                format!(
-                    "<ul>{}</ul>",
-                    items.iter().fold(String::new(), |acc, item| format!(
-                        "{}<li>{}</li>",
-                        acc, item
-                    ))
-                )
-            }
-        }
+        format!(
+            "<p>{}</p>",
+            self.0
+                .iter()
+                .fold(String::new(), |acc, line| acc + line.render_html().as_str())
+        )
     }
 }
 
