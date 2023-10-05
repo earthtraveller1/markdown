@@ -178,15 +178,12 @@ impl Paragraph {
     fn render_html(&self) -> String {
         match self {
             Paragraph::Normal(lines) => {
-                let internals = lines
-                    .iter()
-                    .fold(String::new(), |acc, line| acc + line.render_html().as_str());
-
-                if lines.len() == 1 {
-                    internals
-                } else {
-                    format!("<p>{}</p>", internals)
-                }
+                format!(
+                    "<p>{}</p>",
+                    lines
+                        .iter()
+                        .fold(String::new(), |acc, line| acc + line.render_html().as_str())
+                )
             }
             Paragraph::UnorderedList(list_items) => {
                 format!(
