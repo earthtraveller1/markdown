@@ -132,7 +132,7 @@ impl Paragraph {
 
                     return Line::Heading {
                         level: hash_counts,
-                        content: raw_line.to_owned(),
+                        content: raw_line.split_at(hash_counts.into()).1.trim().to_string(),
                     };
                 })
                 .collect(),
@@ -140,12 +140,16 @@ impl Paragraph {
     }
 
     fn render_html(&self) -> String {
-        format!(
-            "<p>{}</p>",
-            self.0
-                .iter()
-                .fold(String::new(), |acc, line| acc + line.render_html().as_str())
-        )
+        let internals = self
+            .0
+            .iter()
+            .fold(String::new(), |acc, line| acc + line.render_html().as_str());
+
+        if self.0.len() == 1 {
+            internals
+        } else {
+            format!("<p>{}</p>", internals)
+        }
     }
 }
 
