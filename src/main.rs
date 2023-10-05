@@ -108,47 +108,94 @@ impl Line {
 }
 
 #[derive(Debug)]
-struct Paragraph(Vec<Line>);
+struct ListItem(String);
+
+#[derive(Debug)]
+enum Paragraph {
+    Normal(Vec<Line>),
+    UnorderedList(Vec<ListItem>),
+}
 
 impl Paragraph {
     fn parse(raw_paragraph: &Vec<String>) -> Result<Paragraph, &'static str> {
-        Ok(Paragraph(
-            raw_paragraph
-                .iter()
-                .map(|raw_line| {
-                    let hash_counts: u8 = raw_line
-                        .chars()
-                        .take_while(|c| *c == '#')
-                        .count()
-                        .try_into()
-                        .unwrap();
-                    if hash_counts == 0 {
-                        return Line::Normal(raw_line.to_owned());
-                    }
+        let first_line = raw_paragraph.first();
+        match first_line {
+            None => return Err("Empty paragraph!"),
+            Some(first_line) => {
+                if first_line.starts_with("- ") {
+                    Ok(Paragraph::UnorderedList({
+                        let mut items = Vec::new();
 
-                    if raw_line.chars().nth(hash_counts.into()) != Some(' ') {
-                        return Line::Normal(raw_line.to_owned());
-                    }
+                        for raw_line in raw_paragraph {
+                            match raw_line.strip_prefix("- ") {
+                                None => {
+                                    return Err("Cannot have normal line in list paragraph.");
+                                }
+                                Some(line) => {
+                                    items.push(ListItem(line.to_string()));
+                                }
+                            }
+                        }
 
-                    return Line::Heading {
-                        level: hash_counts,
-                        content: raw_line.split_at(hash_counts.into()).1.trim().to_string(),
-                    };
-                })
-                .collect(),
-        ))
+                        items
+                    }))
+                } else {
+                    Ok(Paragraph::Normal(
+                        raw_paragraph
+                            .iter()
+                            .map(|raw_line| {
+                                let hash_counts: u8 = raw_line
+                                    .chars()
+                                    .take_while(|c| *c == '#')
+                                    .count()
+                                    .try_into()
+                                    .unwrap();
+
+                                if hash_counts == 0 {
+                                    return Line::Normal(raw_line.to_owned());
+                                }
+
+                                if raw_line.chars().nth(hash_counts.into()) != Some(' ') {
+                                    return Line::Normal(raw_line.to_owned());
+                                }
+
+                                return Line::Heading {
+                                    level: hash_counts,
+                                    content: raw_line
+                                        .split_at(hash_counts.into())
+                                        .1
+                                        .trim()
+                                        .to_string(),
+                                };
+                            })
+                            .collect(),
+                    ))
+                }
+            }
+        }
     }
 
     fn render_html(&self) -> String {
-        let internals = self
-            .0
-            .iter()
-            .fold(String::new(), |acc, line| acc + line.render_html().as_str());
+        match self {
+            Paragraph::Normal(lines) => {
+                let internals = lines
+                    .iter()
+                    .fold(String::new(), |acc, line| acc + line.render_html().as_str());
 
-        if self.0.len() == 1 {
-            internals
-        } else {
-            format!("<p>{}</p>", internals)
+                if lines.len() == 1 {
+                    internals
+                } else {
+                    format!("<p>{}</p>", internals)
+                }
+            }
+            Paragraph::UnorderedList(list_items) => {
+                format!(
+                    "<ul>{}</ul>",
+                    list_items.iter().fold(String::new(), |acc, item| {
+                        format!("{}<li>{}</li>", acc, item.0)
+                    })
+                )
+            }
         }
     }
 }
