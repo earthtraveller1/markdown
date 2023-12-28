@@ -61,6 +61,7 @@ impl ToRawParagraphs for str {
     }
 }
 
+#[derive(Debug)]
 enum Line<'a> {
     NormalLine {
         content: &'a str,
@@ -80,6 +81,7 @@ enum Line<'a> {
     },
 }
 
+#[derive(Debug)]
 struct LineParagraphs<'a> {
     lines: Box<[Line<'a>]>,
 }
@@ -108,6 +110,12 @@ fn main() {
         }
     };
 
-    let paragraphs = input_content.as_str().to_raw_paragraphs();
-    println!("Here are the raw paragraphs: {:?}", paragraphs);
+    let raw_paragraphs = input_content.as_str().to_raw_paragraphs();
+    println!("Here are the raw paragraphs: {:?}", raw_paragraphs);
+
+    let line_paragraphs = raw_paragraphs
+        .iter()
+        .map(|raw_paragraph| raw_paragraph.to_line_paragraph())
+        .collect::<Box<[LineParagraphs]>>();
+    println!("Here are the line paragraphs: {:?}", line_paragraphs);
 }
