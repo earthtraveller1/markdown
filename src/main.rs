@@ -1,14 +1,16 @@
+use itertools::Itertools;
+
 #[derive(Default)]
 struct CommandLineOptions {
     input_file: Box<str>,
 }
 
 fn main() {
-    let options = std::env::args().collect::<Vec<String>>().windows(2).fold(
+    let options = std::env::args().tuple_windows().fold(
         CommandLineOptions::default(),
-        |mut acc, window| {
-            if window.first().unwrap() == "-i" {
-                acc.input_file = window.last().unwrap().clone().into_boxed_str();
+        |mut acc, (first, last)| {
+            if first == "-i" {
+                acc.input_file = last.clone().into_boxed_str();
             }
             return acc;
         },
