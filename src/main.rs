@@ -5,6 +5,30 @@ struct CommandLineOptions {
     input_file: Box<str>,
 }
 
+#[derive(Debug)]
+struct RawParagraph<'a> {
+    lines: Box<[&'a str]>,
+}
+
+fn str_to_raw_paragraphs<'a>(input_content: &'a str) -> Box<[RawParagraph<'a>]> {
+    input_content
+        .lines()
+        .group_by(|line| line.trim().is_empty())
+        .into_iter()
+        .map(|(_, line_group)| line_group.collect::<Vec<&str>>())
+        .filter(|line_group| {
+            line_group
+                .iter()
+                .filter(|line| !line.trim().is_empty())
+                .next()
+                .is_some()
+        })
+        .map(|line_group| RawParagraph {
+            lines: Box::from(line_group.as_slice()),
+        })
+        .collect::<Box<[RawParagraph]>>()
+}
+
 fn main() {
     let options = std::env::args().tuple_windows().fold(
         CommandLineOptions::default(),
@@ -29,5 +53,6 @@ fn main() {
         }
     };
 
-    println!("Here is the input file content:\n{}", input_content);
+    let paragraphs = str_to_raw_paragraphs(&input_content);
+    println!("Here are the raw paragraphs: {:?}", paragraphs);
 }
