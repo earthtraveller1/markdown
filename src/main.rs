@@ -10,14 +10,33 @@ struct RawParagraph<'a> {
     lines: Box<[&'a str]>,
 }
 
+impl<'a> RawParagraph<'a> {
+    fn to_line_paragraph(&self) -> LineParagraphs<'a> {
+        LineParagraphs {
+            lines: self.lines.iter().map(|line| {
+                let line_trimmed = line.trim();
+                if line_trimmed.starts_with("#") {
+                    Line::Heading {
+                        content: line,
+                        level: line_trimmed.chars().take_while(|c| *c == '#').count().try_into().unwrap_or(u8::MAX)
+                    }
+                } else {
+                    Line::NormalLine {
+                        content: line
+                    }
+                }
+            }).collect()
+        }
+    }
+}
+
 trait ToRawParagraphs {
     fn to_raw_paragraphs<'a>(&'a self) -> Box<[RawParagraph<'a>]>;
 }
 
 impl ToRawParagraphs for str {
     fn to_raw_paragraphs<'a>(&'a self) -> Box<[RawParagraph<'a>]> {
-        self
-            .lines()
+        self.lines()
             .group_by(|line| line.trim().is_empty())
             .into_iter()
             .map(|(_, line_group)| line_group.collect::<Vec<&str>>())
@@ -33,6 +52,17 @@ impl ToRawParagraphs for str {
             })
             .collect::<Box<[RawParagraph]>>()
     }
+}
+
+enum Line<'a> {
+    NormalLine{ content: &'a str },
+    Heading{ content: &'a str, level: u8 },
+    UnorderedListItem { content: &'a str, indents: u8 },
+    OrderedListItem { content: &'a str, indents: u8, number: u32 }
+}
+
+struct LineParagraphs<'a> {
+    lines: Box<[Line<'a>]>
 }
 
 fn main() {
