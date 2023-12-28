@@ -13,19 +13,26 @@ struct RawParagraph<'a> {
 impl<'a> RawParagraph<'a> {
     fn to_line_paragraph(&self) -> LineParagraphs<'a> {
         LineParagraphs {
-            lines: self.lines.iter().map(|line| {
-                let line_trimmed = line.trim();
-                if line_trimmed.starts_with("#") {
-                    Line::Heading {
-                        content: line,
-                        level: line_trimmed.chars().take_while(|c| *c == '#').count().try_into().unwrap_or(u8::MAX)
+            lines: self
+                .lines
+                .iter()
+                .map(|line| {
+                    let line_trimmed = line.trim();
+                    if line_trimmed.starts_with("#") {
+                        Line::Heading {
+                            content: line,
+                            level: line_trimmed
+                                .chars()
+                                .take_while(|c| *c == '#')
+                                .count()
+                                .try_into()
+                                .unwrap_or(u8::MAX),
+                        }
+                    } else {
+                        Line::NormalLine { content: line }
                     }
-                } else {
-                    Line::NormalLine {
-                        content: line
-                    }
-                }
-            }).collect()
+                })
+                .collect(),
         }
     }
 }
@@ -55,14 +62,26 @@ impl ToRawParagraphs for str {
 }
 
 enum Line<'a> {
-    NormalLine{ content: &'a str },
-    Heading{ content: &'a str, level: u8 },
-    UnorderedListItem { content: &'a str, indents: u8 },
-    OrderedListItem { content: &'a str, indents: u8, number: u32 }
+    NormalLine {
+        content: &'a str,
+    },
+    Heading {
+        content: &'a str,
+        level: u8,
+    },
+    UnorderedListItem {
+        content: &'a str,
+        indents: u8,
+    },
+    OrderedListItem {
+        content: &'a str,
+        indents: u8,
+        number: u32,
+    },
 }
 
 struct LineParagraphs<'a> {
-    lines: Box<[Line<'a>]>
+    lines: Box<[Line<'a>]>,
 }
 
 fn main() {
