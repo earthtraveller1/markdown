@@ -10,23 +10,29 @@ struct RawParagraph<'a> {
     lines: Box<[&'a str]>,
 }
 
-fn str_to_raw_paragraphs<'a>(input_content: &'a str) -> Box<[RawParagraph<'a>]> {
-    input_content
-        .lines()
-        .group_by(|line| line.trim().is_empty())
-        .into_iter()
-        .map(|(_, line_group)| line_group.collect::<Vec<&str>>())
-        .filter(|line_group| {
-            line_group
-                .iter()
-                .filter(|line| !line.trim().is_empty())
-                .next()
-                .is_some()
-        })
-        .map(|line_group| RawParagraph {
-            lines: Box::from(line_group.as_slice()),
-        })
-        .collect::<Box<[RawParagraph]>>()
+trait ToRawParagraphs {
+    fn to_raw_paragraphs<'a>(&'a self) -> Box<[RawParagraph<'a>]>;
+}
+
+impl ToRawParagraphs for str {
+    fn to_raw_paragraphs<'a>(&'a self) -> Box<[RawParagraph<'a>]> {
+        self
+            .lines()
+            .group_by(|line| line.trim().is_empty())
+            .into_iter()
+            .map(|(_, line_group)| line_group.collect::<Vec<&str>>())
+            .filter(|line_group| {
+                line_group
+                    .iter()
+                    .filter(|line| !line.trim().is_empty())
+                    .next()
+                    .is_some()
+            })
+            .map(|line_group| RawParagraph {
+                lines: Box::from(line_group.as_slice()),
+            })
+            .collect::<Box<[RawParagraph]>>()
+    }
 }
 
 fn main() {
@@ -53,6 +59,6 @@ fn main() {
         }
     };
 
-    let paragraphs = str_to_raw_paragraphs(&input_content);
+    let paragraphs = input_content.as_str().to_raw_paragraphs();
     println!("Here are the raw paragraphs: {:?}", paragraphs);
 }
