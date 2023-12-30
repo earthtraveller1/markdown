@@ -28,6 +28,36 @@ impl<'a> RawParagraph<'a> {
                                 .try_into()
                                 .unwrap_or(u8::MAX),
                         }
+                    } else if line_trimmed.starts_with("-") {
+                        Line::UnorderedListItem {
+                            content: line,
+                            indents: line
+                                .chars()
+                                .take_while(|c| c.is_whitespace())
+                                .count()
+                                .try_into()
+                                .unwrap(),
+                        }
+                    } else if line_trimmed.starts_with(|c: char| c.is_ascii_digit()) {
+                        let numbers = line_trimmed.chars().take_while(|c| c.is_ascii_digit());
+                        if let Some(expected_dot) = numbers.clone().next() {
+                            if expected_dot == '.' {
+                                Line::OrderedListItem {
+                                    content: line,
+                                    indents: line
+                                        .chars()
+                                        .take_while(|c| c.is_whitespace())
+                                        .count()
+                                        .try_into()
+                                        .unwrap(),
+                                    number: numbers.collect::<String>().parse::<u32>().unwrap_or(1),
+                                }
+                            } else {
+                                Line::NormalLine { content: line }
+                            }
+                        } else {
+                            Line::NormalLine { content: line }
+                        }
                     } else {
                         Line::NormalLine { content: line }
                     }
