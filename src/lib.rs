@@ -6,6 +6,12 @@ pub struct RawParagraph<'a> {
 }
 
 impl<'a> RawParagraph<'a> {
+    pub fn from_lines(lines: &[&'a str]) -> RawParagraph<'a> {
+        RawParagraph {
+            lines: Box::from(lines)
+        }
+    }
+
     pub fn to_line_paragraph(&self) -> LineParagraph<'a> {
         LineParagraph {
             lines: self
