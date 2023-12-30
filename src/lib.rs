@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct RawParagraph<'a> {
     lines: Box<[&'a str]>,
 }
