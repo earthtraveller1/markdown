@@ -11,8 +11,8 @@ struct RawParagraph<'a> {
 }
 
 impl<'a> RawParagraph<'a> {
-    fn to_line_paragraph(&self) -> LineParagraphs<'a> {
-        LineParagraphs {
+    fn to_line_paragraph(&self) -> LineParagraph<'a> {
+        LineParagraph {
             lines: self
                 .lines
                 .iter()
@@ -112,7 +112,7 @@ enum Line<'a> {
 }
 
 #[derive(Debug)]
-struct LineParagraphs<'a> {
+struct LineParagraph<'a> {
     lines: Box<[Line<'a>]>,
 }
 
@@ -146,6 +146,6 @@ fn main() {
     let line_paragraphs = raw_paragraphs
         .iter()
         .map(|raw_paragraph| raw_paragraph.to_line_paragraph())
-        .collect::<Box<[LineParagraphs]>>();
+        .collect::<Box<[LineParagraph]>>();
     println!("Here are the line paragraphs: {:?}", line_paragraphs);
 }
